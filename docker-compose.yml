@@ -1,0 +1,84 @@
+version: "3.9"
+
+services:
+  # ── Mock IIQ + ServiceNow API server ─────────────────────────────────────────
+  mock-server:
+    build:
+      context: ./mock-server
+      dockerfile: Dockerfile
+    ports:
+      - "3001:3001"
+    environment:
+      MOCK_PORT: "3001"
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:3001/identityiq/scim/v2/ServiceProviderConfig"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+
+  # ── MCP Server (IIQ tools — standalone reference; agent runs its own copy) ───
+  mcp-server:
+    build:
+      context: ./mcp-server
+      dockerfile: Dockerfile
+    stdin_open: true      # MCP uses stdio
+    tty: false
+    environment:
+      IIQ_USE_MOCK: "true"
+      MOCK_IIQ_URL: "http://mock-server:3001"
+      IIQ_USERNAME: "svc_api_integration"
+      IIQ_PASSWORD: "mock-password"
+    depends_on:
+      mock-server:
+        condition: service_healthy
+
+  # ── Python RCA Agent ─────────────────────────────────────────────────────────
+  # Build context is the repo root so the Dockerfile can copy both
+  # agent/ and mcp-server/ into the image (agent spawns MCP as a subprocess).
+  agent:
+    build:
+      context: .
+      dockerfile: agent/Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      IIQ_USE_MOCK: "true"
+      MOCK_IIQ_URL: "http://mock-server:3001"
+      IIQ_USERNAME: "svc_api_integration"
+      IIQ_PASSWORD: "mock-password"
+      SNOW_BASE_URL: "http://mock-server:3001"
+      SNOW_USERNAME: "svc_rca_agent"
+      SNOW_PASSWORD: "mock-snow-password"
+      SNOW_IAM_ASSIGNMENT_GROUP: "IAM-Ops-Team"
+      SNOW_L3_ASSIGNMENT_GROUP: "IAM-L3-Team"
+      AGENT_PORT: "8000"
+    depends_on:
+      mock-server:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:8000/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+  # ── Integration test runner ───────────────────────────────────────────────────
+  tests:
+    build:
+      context: ./agent
+      dockerfile: Dockerfile
+    command: >
+      sh -c "pip install pytest pytest-asyncio httpx &&
+             cd /app &&
+             python -m pytest /tests -v --tb=short"
+    volumes:
+      - ./tests:/tests
+    environment:
+      AGENT_URL: "http://agent:8000"
+      MOCK_IIQ_URL: "http://mock-server:3001"
+    depends_on:
+      agent:
+        condition: service_healthy
+    profiles:
+      - test
