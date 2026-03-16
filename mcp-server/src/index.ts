@@ -36,45 +36,45 @@ async function main(): Promise<void> {
     version: '2.0.0',
   });
 
-  // ─── Register all tools (Phase 1 + Phase 2) ──────────────────────────────
-  // A1: iiq_identity_get
-  // A2: iiq_identity_check_exists
+  // ─── Register all tools ───────────────────────────────────────────────────
+  // Capability 1: iiq_identity_get
+  // Capability 2: iiq_identity_check_exists
   registerIdentityTools(server, client);
 
-  // B1: iiq_request_search
-  // B2: iiq_request_get_details
+  // Capability 3: iiq_request_search
+  // Capability 4: iiq_request_get_details
   registerRequestTools(server, client);
 
-  // C1: iiq_workflow_get_status
-  // C2: iiq_workflow_list_launched
+  // Capability 5: iiq_workflow_get_status
+  // Capability 6: iiq_workflow_list_launched
   registerWorkflowTools(server, client);
 
-  // D1: iiq_provisioning_search_transactions
-  // D2: iiq_provisioning_get_details
+  // Capability 7: iiq_provisioning_search_transactions
+  // Capability 8: iiq_provisioning_get_details
   registerProvisioningTools(server, client);
 
-  // E1: iiq_entitlement_get_all
-  // E2: iiq_entitlement_check_present
+  // Capability 9: iiq_entitlement_get_all
+  // Capability 10: iiq_entitlement_check_present
   registerEntitlementTools(server, client);
 
-  // F1: iiq_task_get_results
-  // F2: iiq_task_check_freshness
+  // Capability 11: iiq_task_get_results
+  // Capability 12: iiq_task_check_freshness
   registerTaskTools(server, client);
 
   console.error(
     '[MCP Server] Registered 12 tools: ' +
-    'A1 (iiq_identity_get), ' +
-    'A2 (iiq_identity_check_exists), ' +
-    'B1 (iiq_request_search), ' +
-    'B2 (iiq_request_get_details), ' +
-    'C1 (iiq_workflow_get_status), ' +
-    'C2 (iiq_workflow_list_launched), ' +
-    'D1 (iiq_provisioning_search_transactions), ' +
-    'D2 (iiq_provisioning_get_details), ' +
-    'E1 (iiq_entitlement_get_all), ' +
-    'E2 (iiq_entitlement_check_present), ' +
-    'F1 (iiq_task_get_results), ' +
-    'F2 (iiq_task_check_freshness)'
+    'Cap1 (iiq_identity_get), ' +
+    'Cap2 (iiq_identity_check_exists), ' +
+    'Cap3 (iiq_request_search), ' +
+    'Cap4 (iiq_request_get_details), ' +
+    'Cap5 (iiq_workflow_get_status), ' +
+    'Cap6 (iiq_workflow_list_launched), ' +
+    'Cap7 (iiq_provisioning_search_transactions), ' +
+    'Cap8 (iiq_provisioning_get_details), ' +
+    'Cap9 (iiq_entitlement_get_all), ' +
+    'Cap10 (iiq_entitlement_check_present), ' +
+    'Cap11 (iiq_task_get_results), ' +
+    'Cap12 (iiq_task_check_freshness)'
   );
 
   // ─── Periodic cache stats logging (stderr only) ───────────────────────────
@@ -103,7 +103,7 @@ async function main(): Promise<void> {
   const transport = new StdioServerTransport();
   await server.connect(transport);
 
-  console.error('[MCP Server] Connected and ready. Tools: A1, A2, B1, B2, C1, C2, D1, D2, E1, E2, F1, F2');
+  console.error('[MCP Server] Connected and ready. Capabilities: Cap1–Cap12 (12 tools registered)');
 }
 
 main().catch((err: unknown) => {

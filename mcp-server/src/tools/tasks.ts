@@ -1,11 +1,11 @@
-// ─── Task Tools: F1 + F2 ──────────────────────────────────────────────────────
-// Tool F1: iiq_task_get_results
+// ─── Task Tools: Capability 11 and Capability 12 ─────────────────────────────
+// Capability 11 (iiq_task_get_results)
 //   Get recent aggregation task results for an application.
 //   Computes consecutive_failures and last success/error timestamps.
 //
-// Tool F2: iiq_task_check_freshness
+// Capability 12 (iiq_task_check_freshness)
 //   Compute a freshness assessment for an application's aggregation data.
-//   Uses the same task results endpoint as F1 but returns a staleness verdict.
+//   Uses the same task results endpoint as Cap11 but returns a staleness verdict.
 //
 // Cache key strategy:
 //   task results:   "tasks:{application}"       TTL 10 min
@@ -18,7 +18,7 @@ import { cache, TASK_TTL_MS, FRESHNESS_TTL_MS } from '../cache/cache.js';
 import type { F1Output, F2Output, IIQTaskResult } from '../types/iiq.js';
 
 export function registerTaskTools(server: McpServer, client: IIQClient): void {
-  // ─── Tool F1: iiq_task_get_results ─────────────────────────────────────────
+  // ─── Capability 11: iiq_task_get_results ─────────────────────────────────
 
   server.tool(
     'iiq_task_get_results',
@@ -63,7 +63,7 @@ export function registerTaskTools(server: McpServer, client: IIQClient): void {
       console.error(`[cache] MISS ${cacheKey}`);
 
       console.error(
-        `[F1] Fetching task results for application="${input.application}" ` +
+        `[Cap11] Fetching task results for application="${input.application}" ` +
         `type=${input.task_type} limit=${input.limit}`
       );
 
@@ -116,7 +116,7 @@ export function registerTaskTools(server: McpServer, client: IIQClient): void {
       cache.set(cacheKey, output, TASK_TTL_MS);
 
       console.error(
-        `[F1] Found ${tasks.length} task(s). consecutive_failures=${consecutiveFailures} ` +
+        `[Cap11] Found ${tasks.length} task(s). consecutive_failures=${consecutiveFailures} ` +
         `last_success=${lastSuccess ?? 'none'} last_error=${lastError ?? 'none'}`
       );
 
@@ -126,7 +126,7 @@ export function registerTaskTools(server: McpServer, client: IIQClient): void {
     }
   );
 
-  // ─── Tool F2: iiq_task_check_freshness ─────────────────────────────────────
+  // ─── Capability 12: iiq_task_check_freshness ─────────────────────────────
 
   server.tool(
     'iiq_task_check_freshness',
@@ -178,7 +178,7 @@ export function registerTaskTools(server: McpServer, client: IIQClient): void {
 
       console.error(`[cache] MISS ${cacheKey}`);
       console.error(
-        `[F2] Checking freshness for application="${input.application}" ` +
+        `[Cap12] Checking freshness for application="${input.application}" ` +
         `expected_frequency=${input.expected_frequency_hours}h ` +
         `threshold_multiplier=${input.staleness_threshold_multiplier}`
       );
@@ -215,7 +215,7 @@ export function registerTaskTools(server: McpServer, client: IIQClient): void {
           consecutive_failures: 0,
         };
         cache.set(cacheKey, output, FRESHNESS_TTL_MS);
-        console.error(`[F2] Assessment=NEVER_RUN for application="${input.application}"`);
+        console.error(`[Cap12] Assessment=NEVER_RUN for application="${input.application}"`);
         return {
           content: [{ type: 'text', text: JSON.stringify(output) }],
         };
@@ -255,7 +255,7 @@ export function registerTaskTools(server: McpServer, client: IIQClient): void {
           consecutive_failures: consecutiveFailures,
         };
         cache.set(cacheKey, output, FRESHNESS_TTL_MS);
-        console.error(`[F2] Assessment=RUNNING for application="${input.application}"`);
+        console.error(`[Cap12] Assessment=RUNNING for application="${input.application}"`);
         return {
           content: [{ type: 'text', text: JSON.stringify(output) }],
         };
@@ -301,7 +301,7 @@ export function registerTaskTools(server: McpServer, client: IIQClient): void {
       cache.set(cacheKey, output, FRESHNESS_TTL_MS);
 
       console.error(
-        `[F2] Assessment=${assessment} for application="${input.application}" ` +
+        `[Cap12] Assessment=${assessment} for application="${input.application}" ` +
         `age_hours=${ageHours !== undefined ? ageHours.toFixed(1) : 'N/A'} ` +
         `threshold=${stalenessThresholdHours}h consecutive_failures=${consecutiveFailures}`
       );

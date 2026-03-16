@@ -1,16 +1,16 @@
-// ─── Access Request Tools: B1 + B2 ────────────────────────────────────────────
-// Tool B1: iiq_request_search
+// ─── Access Request Tools: Capability 3 and Capability 4 ─────────────────────
+// Capability 3 (iiq_request_search)
 //   Search access requests for an identity, filtered by status and timeframe.
 //   NO CACHE — requests change state frequently (pending → approved → complete).
 //
-// Tool B2: iiq_request_get_details
+// Capability 4 (iiq_request_get_details)
 //   Get the full details of a single access request by ID.
 //   Cache TTL 2 min, key: request:{request_id}
 //
 // Downstream logic notes (for agent):
-//   total == 0                    → NO_ACCESS_REQUEST_FOUND
-//   requests[0].status == Pending → continue to C1 (workflow check)
-//   requests[0].status == Rejected → REQUEST_REJECTED (stop)
+//   total == 0                       → NO_ACCESS_REQUEST_FOUND
+//   requests[0].status == Pending    → continue to workflow check (Cap5)
+//   requests[0].status == Rejected   → REQUEST_REJECTED (stop)
 
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from 'zod';
@@ -22,7 +22,7 @@ import type { IIQAccessRequest } from '../types/iiq.js';
 const REQUEST_TTL_MS = 2 * 60 * 1000;
 
 export function registerRequestTools(server: McpServer, client: IIQClient): void {
-  // ─── Tool B1: iiq_request_search ─────────────────────────────────────────
+  // ─── Capability 3: iiq_request_search ────────────────────────────────────
 
   server.tool(
     'iiq_request_search',
@@ -87,7 +87,7 @@ export function registerRequestTools(server: McpServer, client: IIQClient): void
       }
 
       console.error(
-        `[B1] Searching access requests for identity=${input.identity_id} ` +
+        `[Cap3] Searching access requests for identity=${input.identity_id} ` +
         `status=${input.status} days_back=${input.days_back} ` +
         `application=${input.application ?? 'any'}`
       );
@@ -106,7 +106,7 @@ export function registerRequestTools(server: McpServer, client: IIQClient): void
       };
 
       console.error(
-        `[B1] Found ${requests.length} request(s) for identity=${input.identity_id}`
+        `[Cap3] Found ${requests.length} request(s) for identity=${input.identity_id}`
       );
 
       return {
@@ -115,7 +115,7 @@ export function registerRequestTools(server: McpServer, client: IIQClient): void
     }
   );
 
-  // ─── Tool B2: iiq_request_get_details ────────────────────────────────────
+  // ─── Capability 4: iiq_request_get_details ───────────────────────────────
 
   server.tool(
     'iiq_request_get_details',
@@ -138,7 +138,7 @@ export function registerRequestTools(server: McpServer, client: IIQClient): void
       }
 
       console.error(`[cache] MISS ${cacheKey}`);
-      console.error(`[B2] Fetching access request id=${input.request_id}`);
+      console.error(`[Cap4] Fetching access request id=${input.request_id}`);
 
       const request = await client.get<IIQAccessRequest>(
         `/rest/accessRequests/${input.request_id}`
@@ -147,7 +147,7 @@ export function registerRequestTools(server: McpServer, client: IIQClient): void
       cache.set(cacheKey, request, REQUEST_TTL_MS);
 
       console.error(
-        `[B2] Request ${input.request_id}: status=${request.status} ` +
+        `[Cap4] Request ${input.request_id}: status=${request.status} ` +
         `items=${request.items?.length ?? 0} workflowCaseId=${request.workflowCaseId ?? 'none'}`
       );
 

@@ -1,6 +1,6 @@
-// ─── Identity Tools: A1 and A2 ────────────────────────────────────────────────
-// Tool A1: iiq_identity_get       — Full identity profile lookup
-// Tool A2: iiq_identity_check_exists — Lightweight existence check (~100ms)
+// ─── Identity Tools: Capability 1 and Capability 2 ───────────────────────────
+// Capability 1 (iiq_identity_get)          — Full identity profile lookup
+// Capability 2 (iiq_identity_check_exists) — Lightweight existence check (~100ms)
 //
 // Cache key strategy:
 //   identity profiles:  "identity:{userName}"   TTL 5 min
@@ -13,7 +13,7 @@ import { cache, IDENTITY_TTL_MS, EXISTS_TTL_MS } from '../cache/cache.js';
 import type { IIQIdentityProfile } from '../types/iiq.js';
 
 export function registerIdentityTools(server: McpServer, client: IIQClient): void {
-  // ─── Tool A1: iiq_identity_get ─────────────────────────────────────────────
+  // ─── Capability 1: iiq_identity_get ──────────────────────────────────────
 
   server.tool(
     'iiq_identity_get',
@@ -95,7 +95,7 @@ export function registerIdentityTools(server: McpServer, client: IIQClient): voi
     }
   );
 
-  // ─── Tool A2: iiq_identity_check_exists ────────────────────────────────────
+  // ─── Capability 2: iiq_identity_check_exists ─────────────────────────────
 
   server.tool(
     'iiq_identity_check_exists',

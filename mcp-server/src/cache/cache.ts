@@ -2,14 +2,14 @@
 // Per-entry expiry cache. Used to reduce IIQ API load during RCA investigations.
 //
 // Cache key strategy (documented per TTL group):
-//   identity profiles:   "identity:{userName}"           TTL 5 min
-//   exists checks:       "exists:{userName}"             TTL 5 min
-//   entitlements:        "entitlements:{identityId}"     TTL 5 min
-//   workflow status:     "workflow:{workflowId}"         TTL 60 sec
-//   task results:        "tasks:{application}"           TTL 10 min
-//   prov transactions:   "prov_tx:{transactionId}"       TTL 5 min
-//   freshness:           "freshness:{application}"       TTL 10 min
-//   access requests:     NO CACHE (state changes frequently)
+//   identity profiles (Cap1/2):   "identity:{userName}"        TTL 5 min
+//   exists checks     (Cap2):     "exists:{userName}"          TTL 5 min
+//   entitlements      (Cap9/10):  "entitlements:{identityId}"  TTL 5 min
+//   workflow status   (Cap5):     "workflow:{workflowId}"      TTL 60 sec
+//   task results      (Cap11):    "tasks:{application}"        TTL 10 min
+//   prov transactions (Cap8):     "prov_tx:{transactionId}"    TTL 5 min
+//   freshness         (Cap12):    "freshness:{application}"    TTL 10 min
+//   access requests   (Cap3/4):   NO CACHE (state changes frequently)
 
 interface CacheEntry<T> {
   value: T;
@@ -139,25 +139,25 @@ export const cache = new Cache(MOCK_MODE);
 // ─── TTL Constants ────────────────────────────────────────────────────────────
 // Centralised so changes propagate to all tool files automatically.
 
-/** identity profiles:   "identity:{userName}"           TTL 5 min */
+/** Cap1/Cap2 — identity profiles: "identity:{userName}"        TTL 5 min */
 export const IDENTITY_TTL_MS = 5 * 60 * 1000;
 
-/** exists checks:       "exists:{userName}"             TTL 5 min */
+/** Cap2 — exists checks: "exists:{userName}"                   TTL 5 min */
 export const EXISTS_TTL_MS = 5 * 60 * 1000;
 
-/** entitlements:        "entitlements:{identityId}"     TTL 5 min */
+/** Cap9/Cap10 — entitlements: "entitlements:{identityId}"      TTL 5 min */
 export const ENTITLEMENT_TTL_MS = 5 * 60 * 1000;
 
-/** workflow status:     "workflow:{workflowId}"         TTL 60 sec */
+/** Cap5 — workflow status: "workflow:{workflowId}"             TTL 60 sec */
 export const WORKFLOW_TTL_MS = 60 * 1000;
 
-/** task results:        "tasks:{application}"           TTL 10 min */
+/** Cap11 — task results: "tasks:{application}"                 TTL 10 min */
 export const TASK_TTL_MS = 10 * 60 * 1000;
 
-/** prov transactions:   "prov_tx:{transactionId}"       TTL 5 min */
+/** Cap8 — prov transactions: "prov_tx:{transactionId}"         TTL 5 min */
 export const PROV_TX_TTL_MS = 5 * 60 * 1000;
 
-/** freshness:           "freshness:{application}"       TTL 10 min */
+/** Cap12 — freshness: "freshness:{application}"                TTL 10 min */
 export const FRESHNESS_TTL_MS = 10 * 60 * 1000;
 
-// access requests:     NO CACHE (state changes frequently — never cache)
+// Cap3/Cap4 — access requests: NO CACHE (state changes frequently)

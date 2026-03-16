@@ -1,10 +1,10 @@
-// ─── Workflow Tools: C1 + C2 ──────────────────────────────────────────────────
-// Tool C1: iiq_workflow_get_status
+// ─── Workflow Tools: Capability 5 and Capability 6 ───────────────────────────
+// Capability 5 (iiq_workflow_get_status)
 //   Get the current status and step details of a workflow instance by ID.
 //   Computes ageHours from the launched timestamp.
 //   Cache TTL 60 seconds, key: workflow:{workflow_id}
 //
-// Tool C2: iiq_workflow_list_launched
+// Capability 6 (iiq_workflow_list_launched)
 //   List launched workflow instances for an identity, with optional filters.
 //   Cache TTL 2 min, key: workflows:{identity_id}
 
@@ -18,7 +18,7 @@ import type { IIQWorkflowInstance } from '../types/iiq.js';
 const WORKFLOW_LIST_TTL_MS = 2 * 60 * 1000;
 
 export function registerWorkflowTools(server: McpServer, client: IIQClient): void {
-  // ─── Tool C1: iiq_workflow_get_status ────────────────────────────────────
+  // ─── Capability 5: iiq_workflow_get_status ───────────────────────────────
 
   server.tool(
     'iiq_workflow_get_status',
@@ -44,7 +44,7 @@ export function registerWorkflowTools(server: McpServer, client: IIQClient): voi
       }
 
       console.error(`[cache] MISS ${cacheKey}`);
-      console.error(`[C1] Fetching workflow instance id=${input.workflow_id}`);
+      console.error(`[Cap5] Fetching workflow instance id=${input.workflow_id}`);
 
       const raw = await client.get<IIQWorkflowInstance>(
         `/rest/workflowInstances/${input.workflow_id}`
@@ -62,7 +62,7 @@ export function registerWorkflowTools(server: McpServer, client: IIQClient): voi
       cache.set(cacheKey, workflow, WORKFLOW_TTL_MS);
 
       console.error(
-        `[C1] Workflow ${input.workflow_id}: status=${workflow.status} ` +
+        `[Cap5] Workflow ${input.workflow_id}: status=${workflow.status} ` +
         `currentStep="${workflow.currentStep}" ageHours=${ageHours}`
       );
 
@@ -72,7 +72,7 @@ export function registerWorkflowTools(server: McpServer, client: IIQClient): voi
     }
   );
 
-  // ─── Tool C2: iiq_workflow_list_launched ─────────────────────────────────
+  // ─── Capability 6: iiq_workflow_list_launched ────────────────────────────
 
   server.tool(
     'iiq_workflow_list_launched',
@@ -150,7 +150,7 @@ export function registerWorkflowTools(server: McpServer, client: IIQClient): voi
       const scimFilter = `target.userName eq "${input.identity_id}" and launched gt "${nDaysAgo}"`;
 
       console.error(
-        `[C2] Listing launched workflows for identity=${input.identity_id} ` +
+        `[Cap6] Listing launched workflows for identity=${input.identity_id} ` +
         `status=${input.status} days_back=${input.days_back} ` +
         `workflow_name=${input.workflow_name ?? 'any'}`
       );
@@ -193,7 +193,7 @@ export function registerWorkflowTools(server: McpServer, client: IIQClient): voi
       }
 
       console.error(
-        `[C2] Found ${allWorkflows.length} total workflow(s), ` +
+        `[Cap6] Found ${allWorkflows.length} total workflow(s), ` +
         `${filteredWorkflows.length} after filtering for identity=${input.identity_id}`
       );
 

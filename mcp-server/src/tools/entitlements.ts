@@ -1,8 +1,8 @@
-// ─── Entitlement Tools: E1 + E2 ───────────────────────────────────────────────
-// Tool E1: iiq_entitlement_get_all
+// ─── Entitlement Tools: Capability 9 and Capability 10 ───────────────────────
+// Capability 9 (iiq_entitlement_get_all)
 //   Get every entitlement assigned to an identity across all applications.
 //
-// Tool E2: iiq_entitlement_check_present
+// Capability 10 (iiq_entitlement_check_present)
 //   Check whether a specific named entitlement is present for an identity on a given application.
 //
 // Cache key strategy:
@@ -16,7 +16,7 @@ import { cache, ENTITLEMENT_TTL_MS } from '../cache/cache.js';
 import type { E1Output, IIQEntitlement } from '../types/iiq.js';
 
 export function registerEntitlementTools(server: McpServer, client: IIQClient): void {
-  // ─── Tool E1: iiq_entitlement_get_all ──────────────────────────────────────
+  // ─── Capability 9: iiq_entitlement_get_all ───────────────────────────────
 
   server.tool(
     'iiq_entitlement_get_all',
@@ -80,7 +80,7 @@ export function registerEntitlementTools(server: McpServer, client: IIQClient): 
           total: 0,
           by_application: {},
         };
-        console.error(`[E1] Identity not found: ${input.identity_id}`);
+        console.error(`[Cap9] Identity not found: ${input.identity_id}`);
         return {
           content: [{ type: 'text', text: JSON.stringify(empty) }],
         };
@@ -115,7 +115,7 @@ export function registerEntitlementTools(server: McpServer, client: IIQClient): 
       cache.set(cacheKey, output, ENTITLEMENT_TTL_MS);
 
       console.error(
-        `[E1] Found ${entitlements.length} entitlement(s) for ${input.identity_id} ` +
+        `[Cap9] Found ${entitlements.length} entitlement(s) for ${input.identity_id} ` +
         `across ${Object.keys(byApp).length} application(s)`
       );
 
@@ -141,7 +141,7 @@ export function registerEntitlementTools(server: McpServer, client: IIQClient): 
     }
   );
 
-  // ─── Tool E2: iiq_entitlement_check_present ─────────────────────────────────
+  // ─── Capability 10: iiq_entitlement_check_present ────────────────────────
 
   server.tool(
     'iiq_entitlement_check_present',
@@ -179,7 +179,7 @@ export function registerEntitlementTools(server: McpServer, client: IIQClient): 
 
       console.error(`[cache] MISS ${cacheKey}`);
       console.error(
-        `[E2] Checking entitlement "${input.entitlement_name}" on "${input.application}" ` +
+        `[Cap10] Checking entitlement "${input.entitlement_name}" on "${input.application}" ` +
         `for identity=${input.identity_id}`
       );
 
@@ -198,7 +198,7 @@ export function registerEntitlementTools(server: McpServer, client: IIQClient): 
 
       if (!userRaw.Resources || userRaw.Resources.length === 0) {
         const notFound = { present: false, identity_active: false };
-        console.error(`[E2] Identity not found: ${input.identity_id}`);
+        console.error(`[Cap10] Identity not found: ${input.identity_id}`);
         // Still cache briefly so repeated lookups for missing identities don't hammer the API
         cache.set(cacheKey, notFound, ENTITLEMENT_TTL_MS);
         return {
@@ -235,7 +235,7 @@ export function registerEntitlementTools(server: McpServer, client: IIQClient): 
       cache.set(cacheKey, output, ENTITLEMENT_TTL_MS);
 
       console.error(
-        `[E2] Entitlement "${input.entitlement_name}" on "${input.application}" ` +
+        `[Cap10] Entitlement "${input.entitlement_name}" on "${input.application}" ` +
         `present=${output.present} identity_active=${identityActive}`
       );
 

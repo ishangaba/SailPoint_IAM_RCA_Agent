@@ -28,8 +28,10 @@ export interface TaskResult {
   messages: TaskMessage[];
 }
 
-// ─── GitHub stale timestamp ───────────────────────────────────────────────────
-// Computed at module load time so the 50-hour offset is accurate at runtime.
+// ─── Relative timestamps ──────────────────────────────────────────────────────
+// All computed at module load time so offsets remain accurate regardless of date.
+
+// GitHub stale: last success 50h ago, two subsequent failures
 const GITHUB_STALE_COMPLETED = new Date(Date.now() - 50 * 60 * 60 * 1000).toISOString();
 const GITHUB_STALE_LAUNCHED = new Date(Date.now() - 50 * 60 * 60 * 1000 - 8 * 60 * 1000).toISOString();
 
@@ -38,6 +40,24 @@ const GITHUB_FAIL1_LAUNCHED = new Date(Date.now() - 26 * 60 * 60 * 1000 - 5 * 60
 
 const GITHUB_FAIL2_COMPLETED = new Date(Date.now() - 14 * 60 * 60 * 1000).toISOString();
 const GITHUB_FAIL2_LAUNCHED = new Date(Date.now() - 14 * 60 * 60 * 1000 - 4 * 60 * 1000).toISOString();
+
+// Active Directory: two recent successes (fresh)
+const AD_SUCCESS1_COMPLETED = new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString();
+const AD_SUCCESS1_LAUNCHED  = new Date(Date.now() - 2 * 60 * 60 * 1000 - 19 * 60 * 1000).toISOString();
+const AD_SUCCESS2_COMPLETED = new Date(Date.now() - 26 * 60 * 60 * 1000).toISOString();
+const AD_SUCCESS2_LAUNCHED  = new Date(Date.now() - 26 * 60 * 60 * 1000 - 18 * 60 * 1000).toISOString();
+
+// SAP ECC: one recent error, one success 20h ago (fresh — within 36h threshold)
+const SAP_ERROR_COMPLETED  = new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString();
+const SAP_ERROR_LAUNCHED   = new Date(Date.now() - 2 * 60 * 60 * 1000 - 6 * 60 * 1000).toISOString();
+const SAP_SUCCESS_COMPLETED = new Date(Date.now() - 20 * 60 * 60 * 1000).toISOString();
+const SAP_SUCCESS_LAUNCHED  = new Date(Date.now() - 20 * 60 * 60 * 1000 - 12 * 60 * 1000).toISOString();
+
+// Workday: one recent error, one success yesterday (fresh)
+const WORKDAY_ERROR_COMPLETED  = new Date(Date.now() - 1 * 60 * 60 * 1000).toISOString();
+const WORKDAY_ERROR_LAUNCHED   = new Date(Date.now() - 1 * 60 * 60 * 1000 - 1 * 60 * 1000).toISOString();
+const WORKDAY_SUCCESS_COMPLETED = new Date(Date.now() - 25 * 60 * 60 * 1000).toISOString();
+const WORKDAY_SUCCESS_LAUNCHED  = new Date(Date.now() - 25 * 60 * 60 * 1000 - 22 * 60 * 1000).toISOString();
 
 // ─── Task Result Records ──────────────────────────────────────────────────────
 
@@ -50,8 +70,8 @@ export const TASK_RESULTS: Record<string, TaskResult[]> = {
       type: 'Aggregation',
       status: 'Success',
       application: 'Active Directory',
-      launched: '2026-03-15T02:00:00Z',
-      completed: '2026-03-15T02:18:33Z',
+      launched: AD_SUCCESS1_LAUNCHED,
+      completed: AD_SUCCESS1_COMPLETED,
       durationMillis: 1113000, // 18 min 33 sec
       statistics: {
         total: 5243,
@@ -68,8 +88,8 @@ export const TASK_RESULTS: Record<string, TaskResult[]> = {
       type: 'Aggregation',
       status: 'Success',
       application: 'Active Directory',
-      launched: '2026-03-14T02:00:00Z',
-      completed: '2026-03-14T02:17:45Z',
+      launched: AD_SUCCESS2_LAUNCHED,
+      completed: AD_SUCCESS2_COMPLETED,
       durationMillis: 1065000,
       statistics: {
         total: 5241,
@@ -89,8 +109,8 @@ export const TASK_RESULTS: Record<string, TaskResult[]> = {
       type: 'Aggregation',
       status: 'Error',
       application: 'SAP ECC',
-      launched: '2026-03-15T02:00:00Z',
-      completed: '2026-03-15T02:05:47Z',
+      launched: SAP_ERROR_LAUNCHED,
+      completed: SAP_ERROR_COMPLETED,
       durationMillis: 347000, // 5 min 47 sec
       statistics: {
         total: 0,
@@ -112,8 +132,8 @@ export const TASK_RESULTS: Record<string, TaskResult[]> = {
       type: 'Aggregation',
       status: 'Success',
       application: 'SAP ECC',
-      launched: '2026-03-14T02:00:00Z',
-      completed: '2026-03-14T02:12:10Z',
+      launched: SAP_SUCCESS_LAUNCHED,
+      completed: SAP_SUCCESS_COMPLETED,
       durationMillis: 730000,
       statistics: {
         total: 1842,
@@ -203,8 +223,8 @@ export const TASK_RESULTS: Record<string, TaskResult[]> = {
       type: 'Aggregation',
       status: 'Error',
       application: 'Workday',
-      launched: '2026-03-15T01:00:00Z',
-      completed: '2026-03-15T01:00:08Z',
+      launched: WORKDAY_ERROR_LAUNCHED,
+      completed: WORKDAY_ERROR_COMPLETED,
       durationMillis: 8000,
       statistics: {
         total: 0,
@@ -226,8 +246,8 @@ export const TASK_RESULTS: Record<string, TaskResult[]> = {
       type: 'Aggregation',
       status: 'Success',
       application: 'Workday',
-      launched: '2026-03-14T01:00:00Z',
-      completed: '2026-03-14T01:22:15Z',
+      launched: WORKDAY_SUCCESS_LAUNCHED,
+      completed: WORKDAY_SUCCESS_COMPLETED,
       durationMillis: 1335000,
       statistics: {
         total: 3100,

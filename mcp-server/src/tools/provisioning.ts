@@ -1,14 +1,14 @@
-// ─── Provisioning Tools: D1 + D2 ──────────────────────────────────────────────
-// Tool D1: iiq_provisioning_search_transactions
+// ─── Provisioning Tools: Capability 7 and Capability 8 ───────────────────────
+// Capability 7 (iiq_provisioning_search_transactions)
 //   Search provisioning transactions by identity, status, application, or timeframe.
 //
-// Tool D2: iiq_provisioning_get_details
+// Capability 8 (iiq_provisioning_get_details)
 //   Get full details of a single provisioning transaction by ID.
 //
 // Cache key strategy:
 //   access requests:     NO CACHE (state changes frequently)
 //   prov transactions:   "prov_tx:{transactionId}"   TTL 5 min (individual lookup only)
-//   D1 list queries:     NO CACHE (results are time-windowed and change)
+//   Cap7 list queries:   NO CACHE (results are time-windowed and change)
 
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from 'zod';
@@ -17,7 +17,7 @@ import { cache, PROV_TX_TTL_MS } from '../cache/cache.js';
 import type { IIQProvisioningTransaction } from '../types/iiq.js';
 
 export function registerProvisioningTools(server: McpServer, client: IIQClient): void {
-  // ─── Tool D1: iiq_provisioning_search_transactions ─────────────────────────
+  // ─── Capability 7: iiq_provisioning_search_transactions ──────────────────
 
   server.tool(
     'iiq_provisioning_search_transactions',
@@ -77,7 +77,7 @@ export function registerProvisioningTools(server: McpServer, client: IIQClient):
       }
 
       console.error(
-        `[D1] Searching provisioning transactions for identity=${input.identity_id} ` +
+        `[Cap7] Searching provisioning transactions for identity=${input.identity_id} ` +
         `status=${input.status} application=${input.application ?? 'any'} ` +
         `days=${input.days_back}`
       );
@@ -95,7 +95,7 @@ export function registerProvisioningTools(server: McpServer, client: IIQClient):
         total: transactions.length,
       };
 
-      console.error(`[D1] Found ${transactions.length} transaction(s)`);
+      console.error(`[Cap7] Found ${transactions.length} transaction(s)`);
 
       return {
         content: [{ type: 'text', text: JSON.stringify(result) }],
@@ -103,7 +103,7 @@ export function registerProvisioningTools(server: McpServer, client: IIQClient):
     }
   );
 
-  // ─── Tool D2: iiq_provisioning_get_details ──────────────────────────────────
+  // ─── Capability 8: iiq_provisioning_get_details ──────────────────────────
 
   server.tool(
     'iiq_provisioning_get_details',
@@ -126,7 +126,7 @@ export function registerProvisioningTools(server: McpServer, client: IIQClient):
       }
 
       console.error(`[cache] MISS ${cacheKey}`);
-      console.error(`[D2] Fetching provisioning transaction id=${input.transaction_id}`);
+      console.error(`[Cap8] Fetching provisioning transaction id=${input.transaction_id}`);
 
       const transaction = await client.get<IIQProvisioningTransaction>(
         `/rest/provisioningTransactions/${input.transaction_id}`
@@ -135,7 +135,7 @@ export function registerProvisioningTools(server: McpServer, client: IIQClient):
       cache.set(cacheKey, transaction, PROV_TX_TTL_MS);
 
       console.error(
-        `[D2] Transaction ${input.transaction_id}: status=${transaction.status} ` +
+        `[Cap8] Transaction ${input.transaction_id}: status=${transaction.status} ` +
         `application=${transaction.applicationName} errors=${transaction.errorMessages?.length ?? 0}`
       );
 
